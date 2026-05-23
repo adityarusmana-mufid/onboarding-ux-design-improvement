@@ -32,13 +32,29 @@ CodePen published an entire FAQ titled [🧀 Why Did Everything Change?](https:/
 
 ---
 
+## Our Prompting Methodology
+
+This project was built using a structured prompt-driven design process. Rather than jumping straight to mockups, we used iterative prompting to:
+
+1. **Decompose the problem first.** We started by asking: what are the *specific* onboarding failures, not just "the new editor is confusing"? This produced five distinct failure modes (see [01-problem-statement.md](brainstorming/01-problem-statement.md)) — each one grounded in a real user behavior, not a vague feeling.
+
+2. **Generate broadly, then prioritize ruthlessly.** Our first prompt produced nine solution ideas across four tiers (see [02-solution-ideas.md](brainstorming/02-solution-ideas.md)). Instead of trying to implement all nine, we ranked them by impact-vs-effort and selected the three that create the biggest UX improvement with the least implementation risk:
+
+   - **Quick Start Mode** — restores the 1-step path
+   - **Progressive Disclosure** — the editor grows with you
+   - **Inline Teaching Tooltips** — learn at the point of action
+
+3. **Build to communicate, not just to function.** Each mockup exists to make a specific argument visible. The "before" mockup shows *what we're restoring the spirit of*. The "after" mockups show *what progressive disclosure actually feels like*. The interactive React app lets judges click through the experience rather than imagining it.
+
+4. **Start from the user's first question.** We redesigned the landing page to answer "what can I achieve?" before explaining "how does it work?" — because that's what a new CodePen user actually wonders. The project gallery showcases real creations first; the onboarding proposal is secondary.
+
+This methodology ensures every design decision traces back to a documented problem, every mockup argues a specific point, and the presentation order matches how users actually think — from "what's possible?" to "how do I use it?"
+
+---
+
 ## The Fix: Progressive Disclosure
 
 The solution isn't to remove power features. It's to **meet users where they are and reveal complexity as they need it.**
-
-We propose three changes:
-
----
 
 ### 1. Quick Start Mode — Restore the 1-Step Path
 
@@ -53,13 +69,9 @@ We propose three changes:
 | Must find Minimal UI setting | Clean by default |
 | 4+ steps to write working CSS | 1 step: open and type |
 
-👉 **See the mockup:** [after-quick-start.html](mockups/after-quick-start.html)
-
----
-
 ### 2. Progressive Disclosure — The Editor Grows With You
 
-**Before:** Every feature is visible from frame one. Sidebar, Blocks, file tree, Omnibar — all competing for attention regardless of whether the user needs them yet.
+**Before:** Every feature visible from frame one. Sidebar, Blocks, file tree, Omnibar — all competing for attention.
 
 **After:** The UI expands through natural progression. Each tier unlocks when the user takes an action that requires it.
 
@@ -72,13 +84,9 @@ We propose three changes:
 
 The key: **each tier auto-promotes when the user's actions require it**, not when they find a settings menu. Pasting SCSS? A tooltip offers "Add Sass" and explains what happened.
 
-👉 **See the mockup:** [after-full-editor.html](mockups/after-full-editor.html)
-
----
-
 ### 3. Inline Teaching Tooltips — Learn by Doing
 
-**Before:** Features silently appear (Blocks auto-added) or silently relocate (settings moved to Sidebar). Users must read the FAQ or use the Omnibar to figure out what changed.
+**Before:** Features silently appear or relocate. Users must read the FAQ or use the Omnibar to figure out what changed.
 
 **After:** Contextual tooltips appear at the exact moment a user encounters a new concept — triggered by their own actions.
 
@@ -87,31 +95,36 @@ The key: **each tier auto-promotes when the user's actions require it**, not whe
 | Sass Block auto-added | "Sass Block added — this compiles your `.scss` into CSS. [Learn more] [Dismiss]" |
 | First Sidebar open | "Your files and settings live here now. [Take the tour] [Got it]" |
 | First Omnibar use | "Search for any feature or setting — try typing 'format'. [Dismiss]" |
-| Adding a `<link>` tag | "External resources are now added directly in HTML instead of a settings panel. [Why?] [Dismiss]" |
-
-This is teaching at the point of action. Not a separate onboarding tour users skip. Not a FAQ page. Learning embedded in the workflow itself.
 
 ---
 
-## Before & After
+## Interactive Demo
 
-### The old CodePen (what we're restoring the spirit of)
+The app in this repo is an interactive React demo you can click through. It has two parts:
 
-👉 [before-classic-editor.html](mockups/before-classic-editor.html)
+### Part 1: Project Gallery (Landing Page)
 
-Simple. Three panes. Zero configuration. Open it, type, see results.
+The first thing a new user should see is **what they can create** — not an explanation of how the editor works. The gallery showcases real CodePen projects organized by category, answering the new user's first question: "what can I achieve here?"
 
-### Our proposed Quick Start mode
+### Part 2: Onboarding Proposal (Before / After Mockups)
 
-👉 [after-quick-start.html](mockups/after-quick-start.html)
+Three interactive mockups showing the proposed fix:
 
-Same simplicity, but built on CodePen 2.0's architecture. The Classic Block is there — the user just doesn't have to know about it.
+| View | What It Shows |
+|---|---|
+| **Before: Classic Editor** | The old 3-pane CodePen — simple, immediate, zero friction |
+| **After: Quick Start** | Our proposed Quick Start mode — same simplicity, built on 2.0's architecture |
+| **After: Full Editor** | Progressive disclosure in action — features appear when needed, not from frame one |
 
-### Our proposed full editor with progressive disclosure
+### Running the app
 
-👉 [after-full-editor.html](mockups/after-full-editor.html)
+```bash
+cd app
+npm install
+npm run dev
+```
 
-Power features are present but not intrusive. The file tree, Blocks panel, and Omnibar are available when needed — not competing for attention from frame one.
+Then open the URL shown in your terminal. The landing page is the project gallery; click "Onboarding Proposal" in the header to see the before/after mockups.
 
 ---
 
@@ -142,6 +155,6 @@ CodePen 2.0 traded simplicity for power. We're proposing they give users **both*
 
 ### Detailed Brainstorming
 
-- [Problem Statement](brainstorming/01-problem-statement.md)
-- [Solution Ideas (9 ideas with priority ranking)](brainstorming/02-solution-ideas.md)
-- [Hackathon Plan](brainstorming/03-hackathon-plan.md)
+- [Problem Statement — five specific onboarding failures](brainstorming/01-problem-statement.md)
+- [Solution Ideas — 9 ideas across 4 tiers with priority ranking](brainstorming/02-solution-ideas.md)
+- [Hackathon Plan — submission strategy and time allocation](brainstorming/03-hackathon-plan.md)
