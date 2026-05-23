@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CodePen Quick Start — AFTER</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg-dark: #131417;
+    --bg-editor: #1d1e22;
+    --bg-header: #010101;
+    --bg-sidebar: #17181d;
+    --text-primary: #c5c8d4;
+    --text-muted: #7a7d8e;
+    --accent-green: #47cf73;
+    --accent-yellow: #e4c660;
+    --accent-blue: #5b9fd4;
+    --accent-purple: #a78bfa;
+    --border-color: #2c2e3a;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Top Bar */
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg-header);
+    padding: 0 16px;
+    height: 50px;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 18px;
+    color: #fff;
+  }
+
+  .logo svg { width: 36px; height: 36px; }
+
+  .pen-title-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .pen-title {
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 15px;
+    font-weight: 500;
+    padding: 6px 10px;
+    border-radius: 4px;
+    width: 200px;
+  }
+
+  .pen-title:focus {
+    outline: 1px solid var(--accent-blue);
+    background: var(--bg-editor);
+  }
+
+  /* Classic Mode Chip — KEY NEW ELEMENT */
+  .classic-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(71, 207, 115, 0.12);
+    border: 1px solid rgba(71, 207, 115, 0.3);
+    color: var(--accent-green);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.15s;
+  }
+
+  .classic-chip:hover {
+    background: rgba(71, 207, 115, 0.2);
+    border-color: var(--accent-green);
+  }
+
+  .classic-chip svg { width: 12px; height: 12px; }
+
+  /* Tooltip for Classic Mode chip */
+  .chip-tooltip {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 8px;
+    background: var(--bg-editor);
+    border: 1px solid var(--accent-green);
+    border-radius: 8px;
+    padding: 16px;
+    width: 320px;
+    z-index: 100;
+    display: none;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+
+  .chip-tooltip.visible { display: block; }
+
+  .chip-tooltip h4 {
+    color: var(--accent-green);
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+
+  .chip-tooltip p {
+    color: var(--text-muted);
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 12px;
+  }
+
+  .chip-tooltip .tooltip-links {
+    display: flex;
+    gap: 12px;
+  }
+
+  .chip-tooltip a {
+    color: var(--accent-blue);
+    font-size: 13px;
+    text-decoration: none;
+  }
+
+  .chip-tooltip a:hover { text-decoration: underline; }
+
+  /* Switch to full editor link */
+  .switch-link {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-muted);
+    font-size: 13px;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 4px;
+    transition: all 0.15s;
+  }
+
+  .switch-link:hover {
+    color: var(--text-primary);
+    background: var(--bg-editor);
+  }
+
+  .switch-link svg { width: 14px; height: 14px; }
+
+  .top-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+  }
+
+  .btn-save { background: var(--accent-green); color: #000; }
+  .btn-save:hover { background: #3db863; }
+  .btn-fork { background: var(--bg-editor); color: var(--text-primary); border: 1px solid var(--border-color); }
+  .btn-fork:hover { background: #2c2e3a; }
+
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--text-muted);
+  }
+
+  /* Editor Area */
+  .editor-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Editor Panels */
+  .editors-row {
+    display: flex;
+    flex: 1;
+    border-bottom: 3px solid var(--bg-header);
+  }
+
+  .editor-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    border-right: 3px solid var(--bg-header);
+  }
+
+  .editor-panel:last-child { border-right: none; }
+
+  .editor-tab {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: var(--bg-header);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  .editor-tab.html-tab { color: var(--accent-yellow); }
+  .editor-tab.css-tab { color: var(--accent-blue); }
+  .editor-tab.js-tab { color: var(--accent-green); }
+
+  .editor-tab svg { width: 14px; height: 14px; }
+
+  /* File path — subtle indicator */
+  .editor-tab .file-path {
+    color: var(--text-muted);
+    font-weight: 400;
+    font-size: 11px;
+    margin-left: 4px;
+    opacity: 0.6;
+  }
+
+  .editor-content {
+    flex: 1;
+    background: var(--bg-editor);
+    padding: 16px;
+    font-family: 'Source Code Pro', 'Fira Code', 'Consolas', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-primary);
+    overflow: auto;
+    white-space: pre;
+  }
+
+  /* Syntax highlighting */
+  .tag { color: #be4678; }
+  .attr { color: #a9a5b6; }
+  .string { color: var(--accent-green); }
+  .selector { color: var(--accent-blue); }
+  .property { color: var(--accent-yellow); }
+  .value { color: var(--accent-green); }
+  .keyword { color: #c678dd; }
+  .function { color: #61afef; }
+  .comment { color: var(--text-muted); font-style: italic; }
+
+  /* Auto-linked indicator — new UI element */
+  .auto-linked {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(71, 207, 115, 0.08);
+    color: var(--text-muted);
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    border: 1px dashed var(--border-color);
+    margin-left: 8px;
+  }
+
+  .auto-linked svg { width: 10px; height: 10px; opacity: 0.5; }
+
+  /* Preview Area */
+  .preview-area {
+    flex: 1;
+    background: #fff;
+    position: relative;
+  }
+
+  .preview-label {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    background: rgba(0,0,0,0.05);
+    color: #888;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .preview-content {
+    padding: 40px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  .preview-content h1 {
+    font-size: 28px;
+    color: #333;
+    margin-bottom: 12px;
+  }
+
+  .preview-content p {
+    font-size: 16px;
+    color: #666;
+    line-height: 1.5;
+  }
+
+  .preview-content .highlight {
+    color: #47cf73;
+    font-weight: 600;
+  }
+
+  /* Bottom Bar */
+  .bottom-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg-header);
+    padding: 0 16px;
+    height: 36px;
+    border-top: 1px solid var(--border-color);
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .console-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    padding: 4px 10px;
+    border-radius: 4px;
+  }
+
+  .console-toggle:hover { background: var(--bg-editor); }
+
+  .layout-toggles {
+    display: flex;
+    gap: 6px;
+  }
+
+  .layout-btn {
+    padding: 4px 8px;
+    border-radius: 3px;
+    cursor: pointer;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    font-size: 11px;
+  }
+
+  .layout-btn:hover { background: var(--bg-editor); }
+  .layout-btn.active { background: var(--bg-editor); color: var(--text-primary); border-color: var(--text-muted); }
+
+  /* Inline Tooltip — Teaching at point of action */
+  .inline-tooltip {
+    position: absolute;
+    background: var(--bg-editor);
+    border: 1px solid var(--accent-green);
+    border-radius: 8px;
+    padding: 12px 16px;
+    max-width: 340px;
+    z-index: 50;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    animation: slideIn 0.3s ease;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .inline-tooltip .tooltip-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .inline-tooltip .tooltip-header svg {
+    width: 16px;
+    height: 16px;
+    color: var(--accent-green);
+  }
+
+  .inline-tooltip .tooltip-header span {
+    color: var(--accent-green);
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .inline-tooltip p {
+    color: var(--text-muted);
+    font-size: 12px;
+    line-height: 1.5;
+    margin-bottom: 10px;
+  }
+
+  .inline-tooltip .tooltip-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .inline-tooltip .tooltip-actions a {
+    color: var(--accent-blue);
+    font-size: 12px;
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  .inline-tooltip .tooltip-actions a:hover { text-decoration: underline; }
+
+  .inline-tooltip .tooltip-actions button {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  .inline-tooltip .tooltip-actions button:hover { color: var(--text-primary); }
+
+  /* Annotation badge */
+  .annotation-badge {
+    position: absolute;
+    bottom: 44px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent-purple);
+    color: #fff;
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    box-shadow: 0 4px 16px rgba(167, 139, 250, 0.3);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 4px 16px rgba(167, 139, 250, 0.3); }
+    50% { box-shadow: 0 4px 24px rgba(167, 139, 250, 0.5); }
+  }
+
+  /* Intro Overlay */
+  .highlight-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .highlight-box {
+    background: var(--bg-editor);
+    border: 2px solid var(--accent-green);
+    border-radius: 16px;
+    padding: 48px;
+    max-width: 620px;
+    text-align: center;
+  }
+
+  .highlight-box h2 {
+    color: var(--accent-green);
+    font-size: 24px;
+    margin-bottom: 16px;
+  }
+
+  .highlight-box p {
+    color: var(--text-primary);
+    font-size: 16px;
+    line-height: 1.7;
+    margin-bottom: 12px;
+  }
+
+  .highlight-box .comparison {
+    display: flex;
+    gap: 32px;
+    margin: 24px 0;
+    text-align: left;
+  }
+
+  .highlight-box .comparison-col {
+    flex: 1;
+    padding: 16px;
+    border-radius: 8px;
+  }
+
+  .highlight-box .comparison-col.before {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+  }
+
+  .highlight-box .comparison-col.after {
+    background: rgba(71, 207, 115, 0.1);
+    border: 1px solid rgba(71, 207, 115, 0.3);
+  }
+
+  .highlight-box .comparison-col h3 {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+
+  .highlight-box .comparison-col.before h3 { color: #ef4444; }
+  .highlight-box .comparison-col.after h3 { color: var(--accent-green); }
+
+  .highlight-box .comparison-col ul {
+    list-style: none;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .highlight-box .comparison-col ul li {
+    padding: 4px 0;
+  }
+
+  .highlight-box .comparison-col ul li::before {
+    margin-right: 6px;
+  }
+
+  .highlight-box .comparison-col.before ul li::before { content: "✗"; color: #ef4444; }
+  .highlight-box .comparison-col.after ul li::before { content: "✓"; color: var(--accent-green); }
+
+  .dismiss-btn {
+    background: var(--accent-green);
+    color: #000;
+    border: none;
+    padding: 12px 32px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 16px;
+  }
+
+  .dismiss-btn:hover { background: #3db863; }
+</style>
+</head>
+<body>
+
+<!-- Intro Overlay -->
+<div class="highlight-overlay" id="introOverlay">
+  <div class="highlight-box">
+    <h2>Quick Start Mode — Our Proposed Fix</h2>
+    <p>CodePen 2.0's full IDE is powerful — but it shouldn't be the first thing new users see.<br>Quick Start mode restores the 1-step path while keeping the full editor one click away.</p>
+    <div class="comparison">
+      <div class="comparison-col before">
+        <h3>Current 2.0 Default</h3>
+        <ul>
+          <li>Full IDE with all panels visible</li>
+          <li>Must discover <code>.pen.html</code> convention</li>
+          <li>Must find Minimal UI setting</li>
+          <li>4+ steps to write working CSS</li>
+        </ul>
+      </div>
+      <div class="comparison-col after">
+        <h3>Quick Start Mode</h3>
+        <ul>
+          <li>Three panes, zero setup</li>
+          <li>Classic Block auto-configured</li>
+          <li>Clean by default — no workaround needed</li>
+          <li>1 step: open and type</li>
+        </ul>
+      </div>
+    </div>
+    <button class="dismiss-btn" onclick="document.getElementById('introOverlay').style.display='none'">Show me the editor</button>
+  </div>
+</div>
+
+<!-- Top Bar -->
+<div class="top-bar">
+  <div style="display:flex;align-items:center;gap:16px;">
+    <div class="logo">
+      <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="6">
+        <polygon points="50,5 95,30 95,70 50,95 5,70 5,30"/>
+        <polygon points="50,25 75,40 75,60 50,75 25,60 25,40"/>
+        <line x1="50" y1="5" x2="50" y2="25"/>
+        <line x1="95" y1="30" x2="75" y2="40"/>
+        <line x1="95" y1="70" x2="75" y2="60"/>
+        <line x1="50" y1="95" x2="50" y2="75"/>
+        <line x1="5" y1="70" x2="25" y2="60"/>
+        <line x1="5" y1="30" x2="25" y2="40"/>
+      </svg>
+      CodePen
+    </div>
+    <div class="pen-title-area">
+      <input class="pen-title" value="Untitled Pen" />
+      <!-- KEY NEW ELEMENT: Classic Mode Chip -->
+      <div class="classic-chip" id="classicChip" onclick="toggleTooltip()">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+        Classic Mode
+        <div class="chip-tooltip" id="chipTooltip">
+          <h4>Classic Mode is active</h4>
+          <p>Your CSS and JS files are auto-linked to your HTML. No need to add <code>&lt;link&gt;</code> or <code>&lt;script&gt;</code> tags manually — CodePen handles the scaffolding for you.</p>
+          <p style="color:var(--text-primary);font-size:12px;">Under the hood: your files use the <code>.pen.html</code> convention and a Classic Block compiles and links everything.</p>
+          <div class="tooltip-links">
+            <a href="#">Learn about Blocks</a>
+            <a href="#">Switch to full editor</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="top-actions">
+    <!-- KEY NEW ELEMENT: Switch to full editor -->
+    <div class="switch-link" id="switchLink">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+      Switch to full editor
+    </div>
+    <button class="btn btn-fork">Fork</button>
+    <button class="btn btn-save">Save</button>
+    <div class="user-avatar"></div>
+  </div>
+</div>
+
+<!-- Editor Area -->
+<div class="editor-area">
+  <!-- Editors Row -->
+  <div class="editors-row">
+    <div class="editor-panel">
+      <div class="editor-tab html-tab">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 3l2 18h7l9-18H3zm11 0l-6 18"/></svg>
+        HTML
+        <span class="file-path">index.html</span>
+        <span class="auto-linked">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>
+          auto-linked
+        </span>
+      </div>
+      <div class="editor-content"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"card"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;h1&gt;</span>Hello, World!<span class="tag">&lt;/h1&gt;</span>
+  <span class="tag">&lt;p&gt;</span>Welcome to <span class="tag">&lt;span</span> <span class="attr">class</span>=<span class="string">"highlight"</span><span class="tag">&gt;</span>CodePen<span class="tag">&lt;/span&gt;</span>.<span class="tag">&lt;/p&gt;</span>
+<span class="tag">&lt;/div&gt;</span></div>
+    </div>
+    <div class="editor-panel">
+      <div class="editor-tab css-tab">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 4l2 16h12l2-16H4zm8 14l-6-4 6-4 6 4-6 4z"/></svg>
+        CSS
+        <span class="file-path">style.css</span>
+        <span class="auto-linked">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>
+          auto-linked
+        </span>
+      </div>
+      <div class="editor-content"><span class="selector">body</span> {
+  <span class="property">display</span>: <span class="value">flex</span>;
+  <span class="property">align-items</span>: <span class="value">center</span>;
+  <span class="property">justify-content</span>: <span class="value">center</span>;
+  <span class="property">min-height</span>: <span class="value">100vh</span>;
+  <span class="property">margin</span>: <span class="value">0</span>;
+  <span class="property">background</span>: <span class="value">#f5f5f5</span>;
+}
+
+<span class="selector">.card</span> {
+  <span class="property">padding</span>: <span class="value">2rem</span>;
+  <span class="property">background</span>: <span class="value">white</span>;
+  <span class="property">border-radius</span>: <span class="value">12px</span>;
+  <span class="property">box-shadow</span>: <span class="value">0 4px 12px rgba(0,0,0,0.1)</span>;
+}
+
+<span class="selector">.highlight</span> {
+  <span class="property">color</span>: <span class="value">#47cf73</span>;
+  <span class="property">font-weight</span>: <span class="value">bold</span>;
+}</div>
+    </div>
+    <div class="editor-panel">
+      <div class="editor-tab js-tab">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14l-4-4 1.41-1.41L11 13.17l5.59-5.59L18 9l-7 7z"/></svg>
+        JS
+        <span class="file-path">script.js</span>
+        <span class="auto-linked">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>
+          auto-linked
+        </span>
+      </div>
+      <div class="editor-content"><span class="comment">// Nothing here yet</span>
+<span class="comment">// Just start typing...</span></div>
+    </div>
+  </div>
+
+  <!-- Preview -->
+  <div class="preview-area">
+    <div class="preview-label">Preview</div>
+    <div class="preview-content">
+      <h1>Hello, World!</h1>
+      <p>Welcome to <span style="color:#47cf73;font-weight:700;">CodePen</span>.</p>
+    </div>
+    <!-- Inline tooltip example -->
+    <div class="inline-tooltip" style="bottom: 12px; left: 16px;">
+      <div class="tooltip-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <span>Inline Teaching Tooltip</span>
+      </div>
+      <p>This tooltip appears at the point of action — e.g., when a Block auto-adds, when the Sidebar opens for the first time, or when a user adds a <code>&lt;link&gt;</code> tag. It teaches in context, not in a separate tour.</p>
+      <div class="tooltip-actions">
+        <a href="#">Learn more</a>
+        <button>Dismiss</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bottom Bar -->
+<div class="bottom-bar">
+  <div style="display:flex;align-items:center;gap:16px;">
+    <div class="console-toggle">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+      Console
+    </div>
+    <span style="color:var(--text-muted);font-size:11px;">
+      <!-- Subtle indicator that more features are available -->
+      Press <kbd style="background:var(--bg-editor);padding:2px 6px;border-radius:3px;border:1px solid var(--border-color);">Ctrl+K</kbd> for Omnibar
+    </span>
+  </div>
+  <div class="layout-toggles">
+    <button class="layout-btn active">Left</button>
+    <button class="layout-btn">Center</button>
+    <button class="layout-btn">Right</button>
+  </div>
+</div>
+
+<script>
+  function toggleTooltip() {
+    const tooltip = document.getElementById('chipTooltip');
+    tooltip.classList.toggle('visible');
+  }
+
+  // Close tooltip when clicking outside
+  document.addEventListener('click', function(e) {
+    const chip = document.getElementById('classicChip');
+    const tooltip = document.getElementById('chipTooltip');
+    if (!chip.contains(e.target)) {
+      tooltip.classList.remove('visible');
+    }
+  });
+</script>
+
+</body>
+</html>

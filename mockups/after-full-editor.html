@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CodePen Full Editor with Progressive Disclosure — AFTER</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg-dark: #131417;
+    --bg-editor: #1d1e22;
+    --bg-header: #010101;
+    --bg-sidebar: #17181d;
+    --bg-surface: #252730;
+    --text-primary: #c5c8d4;
+    --text-muted: #7a7d8e;
+    --accent-green: #47cf73;
+    --accent-yellow: #e4c660;
+    --accent-blue: #5b9fd4;
+    --accent-purple: #a78bfa;
+    --accent-orange: #fb923c;
+    --accent-red: #ef4444;
+    --border-color: #2c2e3a;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Top Bar */
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg-header);
+    padding: 0 16px;
+    height: 50px;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 18px;
+    color: #fff;
+  }
+
+  .logo svg { width: 36px; height: 36px; }
+
+  .pen-title {
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 15px;
+    font-weight: 500;
+    padding: 6px 10px;
+    border-radius: 4px;
+    width: 200px;
+  }
+
+  .pen-title:focus {
+    outline: 1px solid var(--accent-blue);
+    background: var(--bg-editor);
+  }
+
+  .top-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+  }
+
+  .btn-save { background: var(--accent-green); color: #000; }
+  .btn-save:hover { background: #3db863; }
+  .btn-fork { background: var(--bg-editor); color: var(--text-primary); border: 1px solid var(--border-color); }
+  .btn-fork:hover { background: #2c2e3a; }
+
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--text-muted);
+  }
+
+  /* Main Layout: Sidebar + Editor Area */
+  .main-layout {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width: 240px;
+    background: var(--bg-sidebar);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .sidebar-section {
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+  }
+
+  .sidebar-header button {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 2px;
+    display: flex;
+    align-items: center;
+  }
+
+  .sidebar-header button:hover { color: var(--text-primary); }
+
+  .file-tree {
+    padding: 4px 0;
+  }
+
+  .file-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    font-size: 13px;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.1s;
+  }
+
+  .file-item:hover { background: var(--bg-surface); color: var(--text-primary); }
+  .file-item.active { background: var(--bg-surface); color: var(--text-primary); }
+  .file-item svg { width: 14px; height: 14px; flex-shrink: 0; }
+  .file-item .file-icon-html { color: var(--accent-orange); }
+  .file-item .file-icon-css { color: var(--accent-blue); }
+  .file-item .file-icon-js { color: var(--accent-yellow); }
+  .file-item .block-badge {
+    margin-left: auto;
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-weight: 600;
+  }
+
+  .block-badge-classic { background: rgba(71, 207, 115, 0.15); color: var(--accent-green); }
+  .block-badge-sass { background: rgba(206, 87, 171, 0.15); color: #ce57ab; }
+
+  /* Blocks Panel */
+  .blocks-panel {
+    padding: 0;
+  }
+
+  .block-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    font-size: 13px;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.1s;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .block-item:hover { background: var(--bg-surface); }
+
+  .block-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .block-icon-classic { background: rgba(71, 207, 115, 0.2); color: var(--accent-green); }
+  .block-icon-babel { background: rgba(91, 159, 212, 0.2); color: var(--accent-blue); }
+  .block-icon-postcss { background: rgba(167, 139, 250, 0.2); color: var(--accent-purple); }
+
+  .block-item .block-status {
+    margin-left: auto;
+    font-size: 10px;
+    color: var(--accent-green);
+  }
+
+  /* Progress tier indicator */
+  .tier-indicator {
+    padding: 12px 16px;
+    background: var(--bg-surface);
+    margin: 8px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+  }
+
+  .tier-indicator .tier-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--accent-green);
+    margin-bottom: 6px;
+  }
+
+  .tier-dots {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 6px;
+  }
+
+  .tier-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border-color);
+  }
+
+  .tier-dot.active { background: var(--accent-green); }
+  .tier-dot.current { background: var(--accent-yellow); box-shadow: 0 0 0 2px rgba(228, 198, 96, 0.3); }
+
+  .tier-indicator .tier-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  .tier-indicator .tier-unlock {
+    font-size: 11px;
+    color: var(--accent-blue);
+    margin-top: 4px;
+    display: block;
+  }
+
+  /* Editor Area (right of sidebar) */
+  .editor-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Editor Panels */
+  .editors-row {
+    display: flex;
+    flex: 1;
+    border-bottom: 3px solid var(--bg-header);
+  }
+
+  .editor-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    border-right: 3px solid var(--bg-header);
+  }
+
+  .editor-panel:last-child { border-right: none; }
+
+  .editor-tab {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: var(--bg-header);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  .editor-tab.html-tab { color: var(--accent-yellow); }
+  .editor-tab.css-tab { color: var(--accent-blue); }
+  .editor-tab.js-tab { color: var(--accent-green); }
+  .editor-tab svg { width: 14px; height: 14px; }
+
+  .editor-content {
+    flex: 1;
+    background: var(--bg-editor);
+    padding: 16px;
+    font-family: 'Source Code Pro', 'Fira Code', 'Consolas', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-primary);
+    overflow: auto;
+    white-space: pre;
+  }
+
+  .tag { color: #be4678; }
+  .attr { color: #a9a5b6; }
+  .string { color: var(--accent-green); }
+  .selector { color: var(--accent-blue); }
+  .property { color: var(--accent-yellow); }
+  .value { color: var(--accent-green); }
+  .keyword { color: #c678dd; }
+  .function { color: #61afef; }
+  .comment { color: var(--text-muted); font-style: italic; }
+
+  /* Preview */
+  .preview-area {
+    flex: 1;
+    background: #fff;
+    position: relative;
+  }
+
+  .preview-label {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    background: rgba(0,0,0,0.05);
+    color: #888;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .preview-content {
+    padding: 40px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  .preview-content h1 {
+    font-size: 28px;
+    color: #333;
+    margin-bottom: 12px;
+  }
+
+  .preview-content p {
+    font-size: 16px;
+    color: #666;
+    line-height: 1.5;
+  }
+
+  .preview-content .highlight {
+    color: #47cf73;
+    font-weight: 600;
+  }
+
+  /* Bottom Bar */
+  .bottom-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg-header);
+    padding: 0 16px;
+    height: 36px;
+    border-top: 1px solid var(--border-color);
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .console-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    padding: 4px 10px;
+    border-radius: 4px;
+  }
+
+  .console-toggle:hover { background: var(--bg-editor); }
+
+  /* Omnibar */
+  .omnibar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 200;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 80px;
+  }
+
+  .omnibar {
+    background: var(--bg-editor);
+    border: 1px solid var(--accent-blue);
+    border-radius: 12px;
+    width: 560px;
+    box-shadow: 0 16px 64px rgba(0,0,0,0.5);
+    overflow: hidden;
+  }
+
+  .omnibar-input {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .omnibar-input svg {
+    width: 20px;
+    height: 20px;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+
+  .omnibar-input input {
+    flex: 1;
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-size: 16px;
+    outline: none;
+  }
+
+  .omnibar-input input::placeholder { color: var(--text-muted); }
+
+  .omnibar-input kbd {
+    background: var(--bg-dark);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: var(--text-muted);
+    border: 1px solid var(--border-color);
+  }
+
+  .omnibar-suggestions {
+    padding: 8px 0;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  .omnibar-section-header {
+    padding: 8px 20px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+  }
+
+  .omnibar-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+
+  .omnibar-item:hover { background: var(--bg-surface); }
+
+  .omnibar-item .item-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .omnibar-item .item-icon svg { width: 16px; height: 16px; }
+
+  .omnibar-item .item-text { flex: 1; }
+  .omnibar-item .item-text .item-name { font-size: 14px; color: var(--text-primary); }
+  .omnibar-item .item-text .item-desc { font-size: 12px; color: var(--text-muted); }
+
+  .omnibar-item .item-shortcut {
+    font-size: 11px;
+    color: var(--text-muted);
+    background: var(--bg-dark);
+    padding: 2px 6px;
+    border-radius: 3px;
+    border: 1px solid var(--border-color);
+  }
+
+  .omnibar-item .item-moved {
+    font-size: 10px;
+    color: var(--accent-orange);
+    padding: 2px 6px;
+    border-radius: 3px;
+    background: rgba(251, 146, 60, 0.1);
+  }
+
+  /* Annotation callout */
+  .callout {
+    position: absolute;
+    z-index: 50;
+  }
+
+  .callout-box {
+    background: var(--bg-editor);
+    border: 1px solid;
+    border-radius: 8px;
+    padding: 12px 16px;
+    max-width: 280px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+
+  .callout-box h5 {
+    font-size: 13px;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .callout-box p {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  .callout-box.green { border-color: var(--accent-green); }
+  .callout-box.green h5 { color: var(--accent-green); }
+  .callout-box.blue { border-color: var(--accent-blue); }
+  .callout-box.blue h5 { color: var(--accent-blue); }
+  .callout-box.purple { border-color: var(--accent-purple); }
+  .callout-box.purple h5 { color: var(--accent-purple); }
+
+  /* Intro Overlay */
+  .highlight-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .highlight-box {
+    background: var(--bg-editor);
+    border: 2px solid var(--accent-green);
+    border-radius: 16px;
+    padding: 48px;
+    max-width: 700px;
+    text-align: center;
+  }
+
+  .highlight-box h2 {
+    color: var(--accent-green);
+    font-size: 24px;
+    margin-bottom: 16px;
+  }
+
+  .highlight-box p {
+    color: var(--text-primary);
+    font-size: 16px;
+    line-height: 1.7;
+    margin-bottom: 12px;
+  }
+
+  .tiers-visual {
+    display: flex;
+    gap: 16px;
+    margin: 24px 0;
+    text-align: left;
+  }
+
+  .tier-card {
+    flex: 1;
+    border-radius: 10px;
+    padding: 16px;
+    border: 1px solid;
+  }
+
+  .tier-card h4 {
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+
+  .tier-card p {
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--text-muted) !important;
+    margin-bottom: 0 !important;
+  }
+
+  .tier-card ul {
+    list-style: none;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 8px;
+  }
+
+  .tier-card ul li { padding: 2px 0; }
+  .tier-card ul li::before { margin-right: 6px; }
+
+  .tier-discover { background: rgba(71,207,115,0.08); border-color: rgba(71,207,115,0.3); }
+  .tier-discover h4 { color: var(--accent-green); }
+  .tier-discover ul li::before { content: "✓"; color: var(--accent-green); }
+
+  .tier-explore { background: rgba(91,159,212,0.08); border-color: rgba(91,159,212,0.3); }
+  .tier-explore h4 { color: var(--accent-blue); }
+  .tier-explore ul li::before { content: "+"; color: var(--accent-blue); }
+
+  .tier-build { background: rgba(167,139,250,0.08); border-color: rgba(167,139,250,0.3); }
+  .tier-build h4 { color: var(--accent-purple); }
+  .tier-build ul li::before { content: "+"; color: var(--accent-purple); }
+
+  .highlight-box .subtitle {
+    color: var(--text-muted);
+    font-size: 14px;
+    font-style: italic;
+  }
+
+  .dismiss-btn {
+    background: var(--accent-green);
+    color: #000;
+    border: none;
+    padding: 12px 32px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 16px;
+  }
+
+  .dismiss-btn:hover { background: #3db863; }
+</style>
+</head>
+<body>
+
+<!-- Intro Overlay -->
+<div class="highlight-overlay" id="introOverlay">
+  <div class="highlight-box">
+    <h2>Progressive Disclosure — The Editor Grows With You</h2>
+    <p>Instead of showing every feature at once, the editor expands through natural progression.<br>Each tier unlocks when the user takes an action that requires it.</p>
+    <div class="tiers-visual">
+      <div class="tier-card tier-discover">
+        <h4>Discover</h4>
+        <p>Where everyone starts</p>
+        <ul>
+          <li>3 panes, one file each</li>
+          <li>Auto-linked HTML/CSS/JS</li>
+          <li>No sidebar, no Blocks</li>
+        </ul>
+      </div>
+      <div class="tier-card tier-explore">
+        <h4>Explore</h4>
+        <p>When you need more</p>
+        <ul>
+          <li>+ File tree visible</li>
+          <li>+ Can add new files</li>
+          <li>Triggered by: adding a file</li>
+        </ul>
+      </div>
+      <div class="tier-card tier-build">
+        <h4>Build</h4>
+        <p>Full power, on demand</p>
+        <ul>
+          <li>+ Blocks panel</li>
+          <li>+ Processor configuration</li>
+          <li>Triggered by: using SCSS/JSX</li>
+        </ul>
+      </div>
+    </div>
+    <p class="subtitle">This mockup shows the "Build" tier — what the editor looks like once a user has progressed.</p>
+    <button class="dismiss-btn" onclick="document.getElementById('introOverlay').style.display='none'">Show me the editor</button>
+  </div>
+</div>
+
+<!-- Top Bar -->
+<div class="top-bar">
+  <div style="display:flex;align-items:center;gap:16px;">
+    <div class="logo">
+      <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="6">
+        <polygon points="50,5 95,30 95,70 50,95 5,70 5,30"/>
+        <polygon points="50,25 75,40 75,60 50,75 25,60 25,40"/>
+        <line x1="50" y1="5" x2="50" y2="25"/>
+        <line x1="95" y1="30" x2="75" y2="40"/>
+        <line x1="95" y1="70" x2="75" y2="60"/>
+        <line x1="50" y1="95" x2="50" y2="75"/>
+        <line x1="5" y1="70" x2="25" y2="60"/>
+        <line x1="5" y1="30" x2="25" y2="40"/>
+      </svg>
+      CodePen
+    </div>
+    <input class="pen-title" value="My Component" />
+  </div>
+  <div class="top-actions">
+    <button class="btn btn-fork">Fork</button>
+    <button class="btn btn-save">Save</button>
+    <div class="user-avatar"></div>
+  </div>
+</div>
+
+<!-- Main Layout -->
+<div class="main-layout">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <!-- Tier indicator — new UX element -->
+    <div class="tier-indicator">
+      <div class="tier-label">Build Tier</div>
+      <div class="tier-dots">
+        <div class="tier-dot active" title="Discover"></div>
+        <div class="tier-dot active" title="Explore"></div>
+        <div class="tier-dot current" title="Build"></div>
+        <div class="tier-dot" title="Advanced"></div>
+      </div>
+      <div class="tier-desc">Full editor with Blocks, file tree, and processor configuration.</div>
+      <a class="tier-unlock" href="#">What triggers the next tier?</a>
+    </div>
+
+    <!-- Files Section -->
+    <div class="sidebar-section">
+      <div class="sidebar-header">
+        Files
+        <button title="Add file">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+      </div>
+      <div class="file-tree">
+        <div class="file-item active">
+          <svg class="file-icon-html" viewBox="0 0 24 24" fill="currentColor"><path d="M3 3l2 18h7l9-18H3zm11 0l-6 18"/></svg>
+          index.html
+        </div>
+        <div class="file-item">
+          <svg class="file-icon-css" viewBox="0 0 24 24" fill="currentColor"><path d="M4 4l2 16h12l2-16H4zm8 14l-6-4 6-4 6 4-6 4z"/></svg>
+          style.scss
+          <span class="block-badge block-badge-sass">Sass</span>
+        </div>
+        <div class="file-item">
+          <svg class="file-icon-js" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14l-4-4 1.41-1.41L11 13.17l5.59-5.59L18 9l-7 7z"/></svg>
+          script.jsx
+          <span class="block-badge block-badge-sass" style="background:rgba(91,159,212,0.15);color:var(--accent-blue);">Babel</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Blocks Section -->
+    <div class="sidebar-section">
+      <div class="sidebar-header">
+        Blocks
+        <button title="Add block">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+      </div>
+      <div class="blocks-panel">
+        <div class="block-item">
+          <div class="block-icon block-icon-classic">C</div>
+          Classic Block
+          <span class="block-status">&#10003; Active</span>
+        </div>
+        <div class="block-item">
+          <div class="block-icon block-icon-babel">B</div>
+          Babel
+          <span class="block-status">&#10003; Active</span>
+        </div>
+        <div class="block-item">
+          <div class="block-icon block-icon-postcss">P</div>
+          PostCSS
+          <span class="block-status">&#10003; Active</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Omnibar hint -->
+    <div style="padding:12px 16px;margin-top:auto;border-top:1px solid var(--border-color);">
+      <div style="display:flex;align-items:center;gap:8px;color:var(--text-muted);font-size:12px;cursor:pointer;" onclick="document.getElementById('omnibarOverlay').style.display='flex'">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        Search features & settings...
+        <kbd style="margin-left:auto;background:var(--bg-dark);padding:2px 6px;border-radius:3px;border:1px solid var(--border-color);font-size:10px;">Ctrl+K</kbd>
+      </div>
+    </div>
+  </div>
+
+  <!-- Editor Area -->
+  <div class="editor-area">
+    <div class="editors-row">
+      <div class="editor-panel">
+        <div class="editor-tab html-tab">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 3l2 18h7l9-18H3zm11 0l-6 18"/></svg>
+          index.html
+        </div>
+        <div class="editor-content"><span class="tag">&lt;!DOCTYPE html&gt;</span>
+<span class="tag">&lt;html</span> <span class="attr">lang</span>=<span class="string">"en"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;head&gt;</span>
+  <span class="tag">&lt;meta</span> <span class="attr">charset</span>=<span class="string">"UTF-8"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;link</span> <span class="attr">rel</span>=<span class="string">"stylesheet"</span> <span class="attr">href</span>=<span class="string">"style.scss"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;/head&gt;</span>
+<span class="tag">&lt;body&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"card"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;h1&gt;</span>Hello, World!<span class="tag">&lt;/h1&gt;</span>
+    <span class="tag">&lt;p&gt;</span>Welcome to <span class="tag">&lt;span</span> <span class="attr">class</span>=<span class="string">"highlight"</span><span class="tag">&gt;</span>CodePen<span class="tag">&lt;/span&gt;</span>.<span class="tag">&lt;/p&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+  <span class="tag">&lt;script</span> <span class="attr">src</span>=<span class="string">"script.jsx"</span><span class="tag">&gt;&lt;/script&gt;</span>
+<span class="tag">&lt;/body&gt;</span>
+<span class="tag">&lt;/html&gt;</span></div>
+      </div>
+      <div class="editor-panel">
+        <div class="editor-tab css-tab">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 4l2 16h12l2-16H4zm8 14l-6-4 6-4 6 4-6 4z"/></svg>
+          style.scss
+        </div>
+        <div class="editor-content"><span class="selector">$primary</span>: <span class="value">#47cf73</span>;
+<span class="selector">$bg</span>: <span class="value">#f5f5f5</span>;
+
+<span class="selector">body</span> {
+  <span class="property">display</span>: <span class="value">flex</span>;
+  <span class="property">align-items</span>: <span class="value">center</span>;
+  <span class="property">justify-content</span>: <span class="value">center</span>;
+  <span class="property">min-height</span>: <span class="value">100vh</span>;
+  <span class="property">margin</span>: <span class="value">0</span>;
+  <span class="property">background</span>: <span class="value">$bg</span>;
+}
+
+<span class="selector">.card</span> {
+  <span class="property">padding</span>: <span class="value">2rem</span>;
+  <span class="property">background</span>: <span class="value">white</span>;
+  <span class="property">border-radius</span>: <span class="value">12px</span>;
+  <span class="property">box-shadow</span>: <span class="value">0 4px 12px rgba(0,0,0,0.1)</span>;
+}
+
+<span class="selector">.highlight</span> {
+  <span class="property">color</span>: <span class="value">$primary</span>;
+  <span class="property">font-weight</span>: <span class="value">bold</span>;
+}</div>
+      </div>
+      <div class="editor-panel">
+        <div class="editor-tab js-tab">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14l-4-4 1.41-1.41L11 13.17l5.59-5.59L18 9l-7 7z"/></svg>
+          script.jsx
+        </div>
+        <div class="editor-content"><span class="keyword">import</span> { <span class="function">useState</span> } <span class="keyword">from</span> <span class="string">'react'</span>;
+
+<span class="keyword">export default function</span> <span class="function">App</span>() {
+  <span class="keyword">const</span> [count, setCount] = <span class="function">useState</span>(<span class="value">0</span>);
+
+  <span class="keyword">return</span> (
+    <span class="tag">&lt;div</span> <span class="attr">className</span>=<span class="string">"card"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;h1&gt;</span>Hello, World!<span class="tag">&lt;/h1&gt;</span>
+      <span class="tag">&lt;p&gt;</span>Count: {count}<span class="tag">&lt;/p&gt;</span>
+      <span class="tag">&lt;button</span> <span class="attr">onClick</span>={() <span class="keyword">=&gt;</span> <span class="function">setCount</span>(count + <span class="value">1</span>)}<span class="tag">&gt;</span>
+        Increment
+      <span class="tag">&lt;/button&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  );
+}</div>
+      </div>
+    </div>
+
+    <!-- Preview -->
+    <div class="preview-area">
+      <div class="preview-label">Preview</div>
+      <div class="preview-content">
+        <h1>Hello, World!</h1>
+        <p>Welcome to <span style="color:#47cf73;font-weight:700;">CodePen</span>.</p>
+      </div>
+
+      <!-- Annotation callouts pointing to key features -->
+      <div class="callout" style="top: 12px; left: 260px;">
+        <div class="callout-box green">
+          <h5>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            Block auto-added
+          </h5>
+          <p>Sass Block was added when you renamed <code>style.css</code> → <code>style.scss</code>. It compiles your SCSS into CSS automatically.</p>
+        </div>
+      </div>
+
+      <div class="callout" style="bottom: 12px; right: 16px;">
+        <div class="callout-box blue">
+          <h5>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            File tree unlocked
+          </h5>
+          <p>You added a second file, so the file tree appeared. You can always find it in the Sidebar.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bottom Bar -->
+<div class="bottom-bar">
+  <div style="display:flex;align-items:center;gap:16px;">
+    <div class="console-toggle">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+      Console
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <span style="color:var(--text-muted);font-size:11px;">
+      Tier: <strong style="color:var(--accent-yellow);">Build</strong> · Press <kbd style="background:var(--bg-editor);padding:2px 6px;border-radius:3px;border:1px solid var(--border-color);">Ctrl+K</kbd> for Omnibar
+    </span>
+  </div>
+</div>
+
+<!-- Omnibar -->
+<div class="omnibar-overlay" id="omnibarOverlay" style="display:none;">
+  <div class="omnibar">
+    <div class="omnibar-input">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" placeholder="Search features, settings, blocks..." autofocus />
+      <kbd>Esc</kbd>
+    </div>
+    <div class="omnibar-suggestions">
+      <div class="omnibar-section-header">Suggested</div>
+      <div class="omnibar-item">
+        <div class="item-icon" style="background:rgba(91,159,212,0.15);color:var(--accent-blue);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
+        </div>
+        <div class="item-text">
+          <div class="item-name">Add Sass Block</div>
+          <div class="item-desc">Compile .scss and .sass files</div>
+        </div>
+      </div>
+      <div class="omnibar-item">
+        <div class="item-icon" style="background:rgba(71,207,115,0.15);color:var(--accent-green);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        </div>
+        <div class="item-text">
+          <div class="item-name">Format on Save</div>
+          <div class="item-desc">Auto-format code when saving</div>
+        </div>
+        <span class="item-moved">Moved from Settings</span>
+      </div>
+      <div class="omnibar-item">
+        <div class="item-icon" style="background:rgba(167,139,250,0.15);color:var(--accent-purple);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+        <div class="item-text">
+          <div class="item-name">Preview Only</div>
+          <div class="item-desc">Hide all editor panels</div>
+        </div>
+        <span class="item-moved">Moved from View menu</span>
+      </div>
+      <div class="omnibar-section-header">Where did ___ go?</div>
+      <div class="omnibar-item">
+        <div class="item-icon" style="background:rgba(251,146,60,0.15);color:var(--accent-orange);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div class="item-text">
+          <div class="item-name">External Resources</div>
+          <div class="item-desc">Now added directly as &lt;link&gt; and &lt;script&gt; tags in HTML</div>
+        </div>
+        <span class="item-moved">Moved from Settings</span>
+      </div>
+      <div class="omnibar-item">
+        <div class="item-icon" style="background:rgba(251,146,60,0.15);color:var(--accent-orange);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div class="item-text">
+          <div class="item-name">CSS Preprocessor</div>
+          <div class="item-desc">Now handled by Blocks — rename your file extension (e.g., .scss)</div>
+        </div>
+        <span class="item-moved">Moved from Settings</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('omnibarOverlay').addEventListener('click', function(e) {
+    if (e.target === this) {
+      this.style.display = 'none';
+    }
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      document.getElementById('omnibarOverlay').style.display = 'none';
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      document.getElementById('omnibarOverlay').style.display = 'flex';
+    }
+  });
+</script>
+
+</body>
+</html>

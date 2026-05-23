@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CodePen Classic Editor — BEFORE</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg-dark: #131417;
+    --bg-editor: #1d1e22;
+    --bg-header: #010101;
+    --text-primary: #c5c8d4;
+    --text-muted: #7a7d8e;
+    --accent-green: #47cf73;
+    --accent-yellow: #e4c660;
+    --accent-blue: #5b9fd4;
+    --border-color: #2c2e3a;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Top Bar */
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg-header);
+    padding: 0 16px;
+    height: 50px;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 18px;
+    color: #fff;
+  }
+
+  .logo svg { width: 36px; height: 36px; }
+
+  .pen-title {
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 15px;
+    font-weight: 500;
+    padding: 6px 10px;
+    border-radius: 4px;
+    width: 200px;
+  }
+
+  .pen-title:focus {
+    outline: 1px solid var(--accent-blue);
+    background: var(--bg-editor);
+  }
+
+  .top-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+  }
+
+  .btn-save {
+    background: var(--accent-green);
+    color: #000;
+  }
+
+  .btn-save:hover { background: #3db863; }
+
+  .btn-fork {
+    background: var(--bg-editor);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+  }
+
+  .btn-fork:hover { background: #2c2e3a; }
+
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--text-muted);
+  }
+
+  /* Editor Area */
+  .editor-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Editor Panels */
+  .editors-row {
+    display: flex;
+    flex: 1;
+    border-bottom: 3px solid var(--bg-header);
+  }
+
+  .editor-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    border-right: 3px solid var(--bg-header);
+  }
+
+  .editor-panel:last-child { border-right: none; }
+
+  .editor-tab {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: var(--bg-header);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  .editor-tab.html-tab { color: var(--accent-yellow); }
+  .editor-tab.css-tab { color: var(--accent-blue); }
+  .editor-tab.js-tab { color: var(--accent-green); }
+
+  .editor-tab svg { width: 14px; height: 14px; }
+
+  .editor-content {
+    flex: 1;
+    background: var(--bg-editor);
+    padding: 16px;
+    font-family: 'Source Code Pro', 'Fira Code', 'Consolas', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-primary);
+    overflow: auto;
+    white-space: pre;
+  }
+
+  /* Syntax highlighting (simplified) */
+  .tag { color: #be4678; }
+  .attr { color: #a9a5b6; }
+  .string { color: var(--accent-green); }
+  .selector { color: var(--accent-blue); }
+  .property { color: var(--accent-yellow); }
+  .value { color: var(--accent-green); }
+  .keyword { color: #c678dd; }
+  .function { color: #61afef; }
+  .comment { color: var(--text-muted); font-style: italic; }
+
+  /* Preview Area */
+  .preview-area {
+    flex: 1;
+    background: #fff;
+    position: relative;
+  }
+
+  .preview-label {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    background: rgba(0,0,0,0.05);
+    color: #888;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .preview-content {
+    padding: 40px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  .preview-content h1 {
+    font-size: 28px;
+    color: #333;
+    margin-bottom: 12px;
+  }
+
+  .preview-content p {
+    font-size: 16px;
+    color: #666;
+    line-height: 1.5;
+  }
+
+  .preview-content .highlight {
+    color: #47cf73;
+    font-weight: 600;
+  }
+
+  /* Bottom Bar */
+  .bottom-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg-header);
+    padding: 0 16px;
+    height: 36px;
+    border-top: 1px solid var(--border-color);
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .console-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    padding: 4px 10px;
+    border-radius: 4px;
+  }
+
+  .console-toggle:hover { background: var(--bg-editor); }
+
+  .layout-toggles {
+    display: flex;
+    gap: 6px;
+  }
+
+  .layout-btn {
+    padding: 4px 8px;
+    border-radius: 3px;
+    cursor: pointer;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    font-size: 11px;
+  }
+
+  .layout-btn:hover { background: var(--bg-editor); }
+  .layout-btn.active { background: var(--bg-editor); color: var(--text-primary); border-color: var(--text-muted); }
+
+  /* Annotation overlay */
+  .annotation {
+    position: absolute;
+    background: rgba(71, 207, 115, 0.15);
+    border: 2px solid var(--accent-green);
+    border-radius: 8px;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  .annotation-label {
+    position: absolute;
+    top: -28px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent-green);
+    color: #000;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  /* Highlight overlay */
+  .highlight-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .highlight-box {
+    background: var(--bg-editor);
+    border: 2px solid var(--accent-green);
+    border-radius: 16px;
+    padding: 48px;
+    max-width: 600px;
+    text-align: center;
+  }
+
+  .highlight-box h2 {
+    color: var(--accent-green);
+    font-size: 24px;
+    margin-bottom: 16px;
+  }
+
+  .highlight-box p {
+    color: var(--text-primary);
+    font-size: 16px;
+    line-height: 1.7;
+    margin-bottom: 24px;
+  }
+
+  .highlight-box .tagline {
+    color: var(--text-muted);
+    font-size: 14px;
+    font-style: italic;
+  }
+
+  .dismiss-btn {
+    background: var(--accent-green);
+    color: #000;
+    border: none;
+    padding: 12px 32px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 16px;
+  }
+
+  .dismiss-btn:hover { background: #3db863; }
+</style>
+</head>
+<body>
+
+<!-- Intro Overlay -->
+<div class="highlight-overlay" id="introOverlay">
+  <div class="highlight-box">
+    <h2>This Was CodePen</h2>
+    <p>Three panes. Zero configuration. Open it, type CSS, see results.<br>The fastest path from idea to working code on the web.</p>
+    <p class="tagline">No file system. No build pipeline. No Blocks. Just HTML, CSS, and JS.</p>
+    <button class="dismiss-btn" onclick="document.getElementById('introOverlay').style.display='none'">Show me the editor</button>
+  </div>
+</div>
+
+<!-- Top Bar -->
+<div class="top-bar">
+  <div style="display:flex;align-items:center;gap:16px;">
+    <div class="logo">
+      <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="6">
+        <polygon points="50,5 95,30 95,70 50,95 5,70 5,30"/>
+        <polygon points="50,25 75,40 75,60 50,75 25,60 25,40"/>
+        <line x1="50" y1="5" x2="50" y2="25"/>
+        <line x1="95" y1="30" x2="75" y2="40"/>
+        <line x1="95" y1="70" x2="75" y2="60"/>
+        <line x1="50" y1="95" x2="50" y2="75"/>
+        <line x1="5" y1="70" x2="25" y2="60"/>
+        <line x1="5" y1="30" x2="25" y2="40"/>
+      </svg>
+      CodePen
+    </div>
+    <input class="pen-title" value="Untitled Pen" />
+  </div>
+  <div class="top-actions">
+    <button class="btn btn-fork">Fork</button>
+    <button class="btn btn-save">Save</button>
+    <div class="user-avatar"></div>
+  </div>
+</div>
+
+<!-- Editor Area -->
+<div class="editor-area">
+  <!-- Editors Row -->
+  <div class="editors-row">
+    <div class="editor-panel">
+      <div class="editor-tab html-tab">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 3l2 18h7l9-18H3zm11 0l-6 18"/></svg>
+        HTML
+      </div>
+      <div class="editor-content"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"card"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;h1&gt;</span>Hello, World!<span class="tag">&lt;/h1&gt;</span>
+  <span class="tag">&lt;p&gt;</span>Welcome to <span class="tag">&lt;span</span> <span class="attr">class</span>=<span class="string">"highlight"</span><span class="tag">&gt;</span>CodePen<span class="tag">&lt;/span&gt;</span>.<span class="tag">&lt;/p&gt;</span>
+<span class="tag">&lt;/div&gt;</span></div>
+    </div>
+    <div class="editor-panel">
+      <div class="editor-tab css-tab">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 4l2 16h12l2-16H4zm8 14l-6-4 6-4 6 4-6 4z"/></svg>
+        CSS
+      </div>
+      <div class="editor-content"><span class="selector">body</span> {
+  <span class="property">display</span>: <span class="value">flex</span>;
+  <span class="property">align-items</span>: <span class="value">center</span>;
+  <span class="property">justify-content</span>: <span class="value">center</span>;
+  <span class="property">min-height</span>: <span class="value">100vh</span>;
+  <span class="property">margin</span>: <span class="value">0</span>;
+  <span class="property">background</span>: <span class="value">#f5f5f5</span>;
+}
+
+<span class="selector">.card</span> {
+  <span class="property">padding</span>: <span class="value">2rem</span>;
+  <span class="property">background</span>: <span class="value">white</span>;
+  <span class="property">border-radius</span>: <span class="value">12px</span>;
+  <span class="property">box-shadow</span>: <span class="value">0 4px 12px rgba(0,0,0,0.1)</span>;
+}
+
+<span class="selector">.highlight</span> {
+  <span class="property">color</span>: <span class="value">#47cf73</span>;
+  <span class="property">font-weight</span>: <span class="value">bold</span>;
+}</div>
+    </div>
+    <div class="editor-panel">
+      <div class="editor-tab js-tab">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14l-4-4 1.41-1.41L11 13.17l5.59-5.59L18 9l-7 7z"/></svg>
+        JS
+      </div>
+      <div class="editor-content"><span class="comment">// Nothing here yet</span>
+<span class="comment">// Just start typing...</span></div>
+    </div>
+  </div>
+
+  <!-- Preview -->
+  <div class="preview-area">
+    <div class="preview-label">Preview</div>
+    <div class="preview-content">
+      <h1>Hello, World!</h1>
+      <p>Welcome to <span style="color:#47cf73;font-weight:700;">CodePen</span>.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Bottom Bar -->
+<div class="bottom-bar">
+  <div class="console-toggle">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+    Console
+  </div>
+  <div class="layout-toggles">
+    <button class="layout-btn active">Left</button>
+    <button class="layout-btn">Center</button>
+    <button class="layout-btn">Right</button>
+  </div>
+</div>
+
+</body>
+</html>
